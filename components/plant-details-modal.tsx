@@ -4,25 +4,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Card } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-import { Droplets, Sparkles, TrendingUp, Coins, Skull, RefreshCw } from "lucide-react"
-import { Plant, GrowthStage, STAGE_NAMES } from "@/types/contracts"
-import { formatPlantAge, formatLastWatered, canHarvest, getPlantProgress, getClientWaterLevel, isCritical, isStageOutOfSync, getExpectedStage } from "@/lib/contract"
+import { Droplet, Sparkles, Flame, Coins, Users, Clock } from "lucide-react"
+import { Plant, ItemType, WATER_COST, FERTILIZER_COST, REWARD_GDN_AMOUNT } from "@/types/contracts"
 import { usePlants } from "@/hooks/usePlants"
-import { HARVEST_REWARD } from "@/types/contracts"
-
-const STAGE_EMOJIS = {
-  [GrowthStage.SEED]: "🌱",
-  [GrowthStage.SPROUT]: "🌿",
-  [GrowthStage.GROWING]: "🪴",
-  [GrowthStage.BLOOMING]: "🌸",
-}
-
-const STAGE_BACKGROUNDS = {
-  [GrowthStage.SEED]: "from-amber-50 to-yellow-50 dark:from-amber-950 dark:to-yellow-950",
-  [GrowthStage.SPROUT]: "from-green-50 to-lime-50 dark:from-green-950 dark:to-lime-950",
-  [GrowthStage.GROWING]: "from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950",
-  [GrowthStage.BLOOMING]: "from-pink-50 to-rose-50 dark:from-pink-950 dark:to-rose-950",
-}
+import { formatTimeRemaining, canUseWater, canUseFertilizer, canClaimReward } from "@/lib/contract"
 
 interface PlantDetailsModalProps {
   plant: Plant | null
@@ -31,31 +16,29 @@ interface PlantDetailsModalProps {
 }
 
 export default function PlantDetailsModal({ plant, isOpen, onClose }: PlantDetailsModalProps) {
-  const { harvestPlant, waterPlant, updatePlantStage, loading } = usePlants()
+  const { useItem, claimReward, careForOtherPlant, loading } = usePlants()
 
   if (!plant) return null
 
-  const stageKey = STAGE_NAMES[plant.stage]
-  const progress = getPlantProgress(plant)
-  const canHarvestPlant = canHarvest(plant)
-  const currentWaterLevel = getClientWaterLevel(plant)
-  const critical = isCritical(plant)
-  const stageOutOfSync = isStageOutOfSync(plant)
-  const expectedStage = getExpectedStage(plant)
+  const canWater = canUseWater(plant)
+  const canFertilize = canUseFertilizer(plant)
+  const canClaim = canClaimReward(plant)
 
-  const handleHarvest = async () => {
-    await harvestPlant(plant.id)
+  const handleUseWater = async () => {
+    await useItem(plant.id, ItemType.WATER)
+  }
+
+  const handleUseFertilizer = async () => {
+    await useItem(plant.id, ItemType.FERTILIZER)
+  }
+
+  const handleClaimReward = async () => {
+    await claimReward(plant.id)
     onClose()
   }
 
-  const handleWater = async () => {
-    await waterPlant(plant.id)
-    onClose()
-  }
-
-  const handleUpdateStage = async () => {
-    await updatePlantStage(plant.id)
-    // Don't close modal - let user see the updated stage
+  const handleCareForOther = async () => {
+    await careForOtherPlant(plant.id)
   }
 
   return (
@@ -63,244 +46,209 @@ export default function PlantDetailsModal({ plant, isOpen, onClose }: PlantDetai
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <span className="text-3xl">{plant.isDead ? '💀' : STAGE_EMOJIS[plant.stage]}</span>
+            <span className="text-3xl">
+              {plant.progress >= 100 ? '🌸' : plant.progress >= 60 ? '🪴' : plant.progress >= 30 ? '🌿' : '🌱'}
+            </span>
             Plant #{plant.id.toString()}
-            {plant.isDead && <span className="text-sm text-gray-500">(Dead)</span>}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Plant visualization */}
           <div className={`h-40 rounded-lg flex items-center justify-center relative overflow-hidden ${
-            plant.isDead
-              ? 'bg-gradient-to-b from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900'
-              : `bg-gradient-to-b ${STAGE_BACKGROUNDS[plant.stage]}`
+            plant.progress >= 100 
+              ? 'bg-gradient-to-b from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950'
+              : plant.progress >= 60
+              ? 'bg-gradient-to-b from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950'
+              : plant.progress >= 30
+              ? 'bg-gradient-to-b from-yellow-50 to-amber-50 dark:from-yellow-950 dark:to-amber-950'
+              : 'bg-gradient-to-b from-red-50 to-orange-50 dark:from-red-950 dark:to-orange-950'
           }`}>
-            {plant.isDead ? (
-              <div className="text-8xl grayscale opacity-50">💀</div>
-            ) : (
+            <div className="text-8xl animate-float">
+              {plant.progress >= 100 ? '🌸' : plant.progress >= 60 ? '🪴' : plant.progress >= 30 ? '🌿' : '🌱'}
+            </div>
+            {plant.progress >= 100 && (
               <>
-                <div className="text-8xl animate-float">{STAGE_EMOJIS[plant.stage]}</div>
-                {/* Stage-specific decorations */}
-                {plant.stage === GrowthStage.SEED && (
-                  <>
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-40 h-3 bg-amber-600/20 dark:bg-amber-400/20 rounded-full" />
-                    <div className="absolute top-4 right-6 text-3xl opacity-30">☀️</div>
-                  </>
-                )}
-                {plant.stage === GrowthStage.SPROUT && (
-                  <>
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-32 h-3 bg-green-600/30 dark:bg-green-400/30 rounded-full" />
-                    <div className="absolute top-4 left-6 text-2xl opacity-40 animate-pulse">💧</div>
-                    <div className="absolute top-4 right-6 text-2xl opacity-40">☀️</div>
-                  </>
-                )}
-                {plant.stage === GrowthStage.GROWING && (
-                  <>
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-36 h-4 bg-emerald-600/40 dark:bg-emerald-400/40 rounded-full" />
-                    <div className="absolute top-6 left-8 text-2xl opacity-30 animate-bounce">🍃</div>
-                    <div className="absolute bottom-8 right-8 text-2xl opacity-30 animate-bounce delay-100">🍃</div>
-                  </>
-                )}
-                {plant.stage === GrowthStage.BLOOMING && (
-                  <>
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-40 h-5 bg-rose-600/40 dark:bg-rose-400/40 rounded-full" />
-                    <div className="absolute top-3 right-3 animate-bounce">
-                      <Sparkles className="w-6 h-6 text-yellow-500" />
-                    </div>
-                    <div className="absolute top-6 left-6 text-3xl animate-pulse">✨</div>
-                    <div className="absolute bottom-8 left-8 text-2xl opacity-50 animate-bounce">🌺</div>
-                    <div className="absolute bottom-8 right-8 text-2xl opacity-50 animate-bounce delay-100">🦋</div>
-                  </>
-                )}
+                <div className="absolute top-3 right-3 animate-bounce">
+                  <Sparkles className="w-6 h-6 text-yellow-500" />
+                </div>
+                <div className="absolute top-6 left-6 text-3xl animate-pulse">✨</div>
               </>
             )}
-            {!plant.isDead && critical && (
-              <div className="absolute top-3 left-3 animate-pulse">
-                <Skull className="w-6 h-6 text-red-500" />
-              </div>
-            )}
           </div>
 
-          {/* Plant info */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">Stage</span>
-              <span className="text-sm font-semibold text-foreground capitalize">{stageKey}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">Planted</span>
-              <span className="text-sm font-semibold text-foreground">{formatPlantAge(plant.plantedDate)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">Last Watered</span>
-              <span className="text-sm font-semibold text-foreground">{formatLastWatered(plant.lastWatered)}</span>
-            </div>
-          </div>
-
-          {/* Growth Progress */}
+          {/* Progress */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-                <TrendingUp className="w-4 h-4 text-primary" />
+                <Sparkles className="w-4 h-4 text-primary" />
                 Growth Progress
               </span>
-              <span className="text-sm font-semibold text-foreground">{Math.floor(progress)}%</span>
+              <span className="text-sm font-semibold text-foreground">{plant.progress}%</span>
             </div>
-            <Progress value={progress} className="h-3" />
+            <Progress value={plant.progress} className="h-3" />
             <p className="text-xs text-muted-foreground">
-              {plant.stage === GrowthStage.SEED && "🌱 Germinating... Water regularly to sprout!"}
-              {plant.stage === GrowthStage.SPROUT && "🌿 Growing strong! Keep watering to reach next stage."}
-              {plant.stage === GrowthStage.GROWING && "🪴 Almost there! One more stage until blooming."}
-              {plant.stage === GrowthStage.BLOOMING && "🌸 Fully grown! Ready to harvest for rewards!"}
+              {plant.progress >= 100 
+                ? "🌸 Fully grown! Claim your reward!"
+                : plant.progress >= 60
+                ? "🪴 Almost there! Keep growing."
+                : plant.progress >= 30
+                ? "🌿 Growing well! Use items to speed up."
+                : "🌱 Just started! Use Water and Fertilizer."}
             </p>
           </div>
 
-          {/* Water level */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-                <Droplets className={`w-4 h-4 ${plant.isDead ? 'text-gray-400' : 'text-blue-500'}`} />
-                Water Level
-              </span>
-              <span className="text-sm font-semibold text-foreground">{currentWaterLevel}%</span>
-            </div>
-            <Progress value={currentWaterLevel} className="h-3" />
-            {!plant.isDead && currentWaterLevel < 50 && currentWaterLevel > 20 && (
-              <p className="text-xs text-orange-600 dark:text-orange-400">⚠️ Water level low! Water your plant soon.</p>
-            )}
-            {!plant.isDead && currentWaterLevel <= 20 && currentWaterLevel > 0 && (
-              <p className="text-xs text-red-600 dark:text-red-400 animate-pulse">🚨 Critical! Plant will die soon!</p>
-            )}
-            {plant.isDead && (
-              <p className="text-xs text-gray-600 dark:text-gray-400">💀 Plant died from dehydration</p>
-            )}
+          {/* Item Usage Stats */}
+          <div className="grid grid-cols-2 gap-3">
+            <Card className="p-3 bg-blue-500/5 border-blue-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Droplet className="w-4 h-4 text-blue-500" />
+                <span className="text-sm font-medium">Water</span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-1">
+                Used: {plant.waterCountInCycle}/2
+              </p>
+              {plant.waterTimeRemaining > 0 && (
+                <p className="text-xs text-orange-600 dark:text-orange-400 flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {formatTimeRemaining(plant.waterTimeRemaining)}
+                </p>
+              )}
+            </Card>
+
+            <Card className="p-3 bg-orange-500/5 border-orange-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Flame className="w-4 h-4 text-orange-500" />
+                <span className="text-sm font-medium">Fertilizer</span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-1">
+                Used: {plant.fertilizerCountInCycle}/2
+              </p>
+              {plant.fertilizerTimeRemaining > 0 && (
+                <p className="text-xs text-orange-600 dark:text-orange-400 flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {formatTimeRemaining(plant.fertilizerTimeRemaining)}
+                </p>
+              )}
+            </Card>
           </div>
 
-          {/* Stage sync warning */}
-          {!plant.isDead && stageOutOfSync && (
-            <Card className="p-4 bg-gradient-to-br from-orange-500/10 to-yellow-500/10 border-orange-500/30">
-              <div className="space-y-3">
-                <div className="text-center space-y-1">
-                  <p className="font-semibold text-foreground flex items-center justify-center gap-2">
-                    <RefreshCw className="w-4 h-4 text-orange-500" />
-                    Stage Out of Sync
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    On-chain: {STAGE_NAMES[plant.stage]} → Expected: {STAGE_NAMES[expectedStage]}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Update the stage to sync blockchain state with actual growth time
-                  </p>
-                </div>
-                <Button
-                  onClick={handleUpdateStage}
-                  disabled={loading}
-                  className="w-full gap-2 bg-orange-600 hover:bg-orange-700 text-white"
-                  size="sm"
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Updating...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="w-4 h-4" />
-                      Update Stage
-                    </>
-                  )}
-                </Button>
-              </div>
-            </Card>
-          )}
-
-          {/* Harvest info */}
-          {canHarvestPlant && (
+          {/* Claim Reward */}
+          {canClaim && (
             <Card className="p-4 bg-gradient-to-br from-yellow-500/10 to-green-500/10 border-yellow-500/30">
               <div className="text-center space-y-2">
                 <p className="font-semibold text-foreground flex items-center justify-center gap-2">
                   <Sparkles className="w-4 h-4 text-yellow-500" />
-                  Ready to Harvest!
+                  Ready to Claim Reward!
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Harvest this plant to receive
+                  Claim your reward and reset progress
                 </p>
                 <p className="flex items-center justify-center gap-2 font-bold text-lg text-primary">
                   <Coins className="w-5 h-5" />
-                  {HARVEST_REWARD} ETH
-                </p>
-              </div>
-            </Card>
-          )}
-
-          {/* Dead plant warning */}
-          {plant.isDead && (
-            <Card className="p-4 bg-gradient-to-br from-gray-500/10 to-gray-500/10 border-gray-500/30">
-              <div className="text-center space-y-2">
-                <p className="font-semibold text-foreground flex items-center justify-center gap-2">
-                  <Skull className="w-4 h-4 text-gray-500" />
-                  Plant Died
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  This plant died from lack of water. Plant a new seed to try again!
+                  {REWARD_GDN_AMOUNT} GDN
                 </p>
               </div>
             </Card>
           )}
 
           {/* Action buttons */}
-          <div className="flex gap-2 pt-4">
+          <div className="space-y-2">
+            {!canClaim && (
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  onClick={handleUseWater}
+                  disabled={loading || !canWater || plant.progress >= 100}
+                  className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                  size="sm"
+                >
+                  {loading ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Droplet className="w-4 h-4" />
+                      Water (+15%)
+                    </>
+                  )}
+                </Button>
+
+                <Button
+                  onClick={handleUseFertilizer}
+                  disabled={loading || !canFertilize || plant.progress >= 100}
+                  className="gap-2 bg-orange-600 hover:bg-orange-700 text-white"
+                  size="sm"
+                >
+                  {loading ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Flame className="w-4 h-4" />
+                      Fertilizer (+20%)
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {canClaim && (
+              <Button
+                onClick={handleClaimReward}
+                disabled={loading}
+                className="w-full gap-2 bg-gradient-to-r from-yellow-500 to-green-600 hover:from-yellow-600 hover:to-green-700 text-white"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Claiming...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    Claim {REWARD_GDN_AMOUNT} GDN
+                  </>
+                )}
+              </Button>
+            )}
+
+            <Button
+              onClick={handleCareForOther}
+              disabled={loading || plant.progress >= 100}
+              variant="outline"
+              className="w-full gap-2"
+              size="sm"
+            >
+              {loading ? (
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <Users className="w-4 h-4" />
+                  Help This Plant (+1% FREE)
+                </>
+              )}
+            </Button>
+
             <Button
               variant="outline"
               onClick={onClose}
-              className="flex-1 bg-transparent"
+              className="w-full bg-transparent"
               disabled={loading}
             >
               Close
             </Button>
-            {!plant.isDead && (
-              <>
-                {canHarvestPlant ? (
-                  <Button
-                    onClick={handleHarvest}
-                    disabled={loading}
-                    className="flex-1 gap-2 bg-gradient-to-r from-yellow-500 to-green-600 hover:from-yellow-600 hover:to-green-700 text-white"
-                  >
-                    {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Harvesting...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        Harvest Plant
-                      </>
-                    )}
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleWater}
-                    disabled={loading}
-                    className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Watering...
-                      </>
-                    ) : (
-                      <>
-                        <Droplets className="w-4 h-4" />
-                        Water Plant
-                      </>
-                    )}
-                  </Button>
-                )}
-              </>
-            )}
           </div>
+
+          {/* Info */}
+          <Card className="p-3 bg-muted/30 border-primary/20">
+            <p className="text-xs text-muted-foreground">
+              💧 <strong>Water</strong>: {WATER_COST} GDN, +15% progress
+              <br />
+              🔥 <strong>Fertilizer</strong>: {FERTILIZER_COST} GDN, +20% progress
+              <br />
+              🤝 <strong>Help Others</strong>: FREE, +1% to any plant
+              <br />
+              ⏱️ <strong>Cycle</strong>: Max 2 uses each, resets every 2 minutes
+            </p>
+          </Card>
         </div>
       </DialogContent>
     </Dialog>

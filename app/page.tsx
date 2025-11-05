@@ -6,22 +6,23 @@ import GardenGrid from "@/components/garden-grid"
 import StatsSidebar from "@/components/stats-sidebar"
 import PlantDetailsModal from "@/components/plant-details-modal"
 import PlantSeedModal from "@/components/plant-seed-modal"
+import VisitFriendModal from "@/components/visit-friend-modal"
 import { usePlants } from "@/hooks/usePlants"
-import { usePlantStageScheduler } from "@/hooks/usePlantStageScheduler"
 
 export default function Home() {
   const [selectedPlantId, setSelectedPlantId] = useState<bigint | null>(null)
   const [showPlantSeedModal, setShowPlantSeedModal] = useState(false)
-  const { plants } = usePlants()
-
-  // Start background scheduler for automatic stage updates
-  const { isRunning } = usePlantStageScheduler()
+  const [showVisitFriendModal, setShowVisitFriendModal] = useState(false)
+  const { plants, gdnBalance } = usePlants()
 
   const selectedPlant = plants.find((p) => p.id === selectedPlantId) || null
 
   return (
     <div className="min-h-screen bg-background">
-      <GardenHeader schedulerRunning={isRunning} />
+      <GardenHeader 
+        gdnBalance={gdnBalance} 
+        onVisitFriend={() => setShowVisitFriendModal(true)}
+      />
       <div className="flex gap-6 p-6 max-w-7xl mx-auto">
         <main className="flex-1">
           <GardenGrid onSelectPlant={setSelectedPlantId} onPlantSeed={() => setShowPlantSeedModal(true)} />
@@ -38,6 +39,7 @@ export default function Home() {
         onClose={() => setSelectedPlantId(null)}
       />
       <PlantSeedModal isOpen={showPlantSeedModal} onClose={() => setShowPlantSeedModal(false)} />
+      <VisitFriendModal isOpen={showVisitFriendModal} onClose={() => setShowVisitFriendModal(false)} />
     </div>
   )
 }

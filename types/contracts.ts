@@ -1,42 +1,76 @@
-// Contract Types and Constants for Lisk Garden DApp (Simplified Workshop Version)
+// Contract Types and Constants for Lisk Garden DApp V2
+// New system: NFT-based plants + GDN ERC20 token economy
 
-// Growth stages enum matching Solidity contract
-export enum GrowthStage {
-  SEED = 0,
-  SPROUT = 1,
-  GROWING = 2,
-  BLOOMING = 3,
+// Item types for plant care
+export enum ItemType {
+  FERTILIZER = 0,
+  WATER = 1,
 }
 
-// Plant interface matching contract struct (simplified)
+// Plant data structure (NFT metadata + mutable state)
+export interface PlantData {
+  progress: number // 0-100%
+  lastWaterResetTime: bigint // timestamp
+  waterCount: number // usage count in current cycle
+  lastFertilizerResetTime: bigint // timestamp
+  fertilizerCount: number // usage count in current cycle
+}
+
+// Full plant info (NFT + data)
 export interface Plant {
   id: bigint
-  owner: string // address
-  stage: GrowthStage
-  plantedDate: bigint // timestamp
-  lastWatered: bigint // timestamp
-  waterLevel: number // uint8 0-100
-  exists: boolean
-  isDead: boolean // NEW: Track if plant died from lack of water
+  owner: string
+  progress: number // 0-100%
+  waterCountInCycle: number
+  fertilizerCountInCycle: number
+  waterTimeRemaining: number // seconds until reset
+  fertilizerTimeRemaining: number // seconds until reset
 }
 
-// Growth stage display names
-export const STAGE_NAMES = {
-  [GrowthStage.SEED]: 'seed',
-  [GrowthStage.SPROUT]: 'sprout',
-  [GrowthStage.GROWING]: 'growing',
-  [GrowthStage.BLOOMING]: 'blooming',
+// Item display names
+export const ITEM_NAMES = {
+  [ItemType.FERTILIZER]: 'Fertilizer',
+  [ItemType.WATER]: 'Water',
 } as const
 
-// Contract constants
-export const PLANT_PRICE = '0.001' // ETH
-export const HARVEST_REWARD = '0.003' // ETH
-export const STAGE_DURATION = 60 // 1 minute in seconds
-export const WATER_DEPLETION_TIME = 30 // 30 seconds - how often water depletes
-export const WATER_DEPLETION_RATE = 20 // 20% - how much water is lost per interval
+// Contract constants (in wei for GDN token - 18 decimals)
+export const ETH_ENTRY_FEE = '0.0001' // ETH to buy initial GDN
+export const INITIAL_GDN_GIVEAWAY = '100' // 100 GDN tokens
+export const REWARD_GDN_AMOUNT = '10' // 10 GDN reward
+export const PLANT_NFT_COST = '50' // 50 GDN to buy plant NFT
+export const FERTILIZER_COST = '15' // 15 GDN per use
+export const WATER_COST = '10' // 10 GDN per use
+export const MAX_CYCLE_USE = 2 // Max uses per cycle
+export const RESET_INTERVAL = 120 // 2 minutes in seconds
 
-// Contract address (to be set after deployment)
-export const LISK_GARDEN_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || ''
+// Contract addresses
+export const LISK_GARDEN_V2_ADDRESS = process.env.NEXT_PUBLIC_LISK_GARDEN_V2_ADDRESS || ''
+export const GARDEN_TOKEN_ADDRESS = process.env.NEXT_PUBLIC_GARDEN_TOKEN_ADDRESS || ''
 
-// Simplified Contract ABI
-export const LISK_GARDEN_ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"plantId","type":"uint256"}],"name":"PlantDied","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"plantId","type":"uint256"},{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":false,"internalType":"uint256","name":"reward","type":"uint256"}],"name":"PlantHarvested","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"uint256","name":"plantId","type":"uint256"}],"name":"PlantSeeded","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"plantId","type":"uint256"},{"indexed":false,"internalType":"uint8","name":"newWaterLevel","type":"uint8"}],"name":"PlantWatered","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"plantId","type":"uint256"},{"indexed":false,"internalType":"enum LiskGarden.GrowthStage","name":"newStage","type":"uint8"}],"name":"StageAdvanced","type":"event"},{"inputs":[],"name":"HARVEST_REWARD","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"PLANT_PRICE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"STAGE_DURATION","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"WATER_DEPLETION_RATE","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"WATER_DEPLETION_TIME","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"plantId","type":"uint256"}],"name":"calculateWaterLevel","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"plantId","type":"uint256"}],"name":"getPlant","outputs":[{"components":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"owner","type":"address"},{"internalType":"enum LiskGarden.GrowthStage","name":"stage","type":"uint8"},{"internalType":"uint256","name":"plantedDate","type":"uint256"},{"internalType":"uint256","name":"lastWatered","type":"uint256"},{"internalType":"uint8","name":"waterLevel","type":"uint8"},{"internalType":"bool","name":"exists","type":"bool"},{"internalType":"bool","name":"isDead","type":"bool"}],"internalType":"struct LiskGarden.Plant","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"user","type":"address"}],"name":"getUserPlants","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"plantId","type":"uint256"}],"name":"harvestPlant","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"plantCounter","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"plantSeed","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"plants","outputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"owner","type":"address"},{"internalType":"enum LiskGarden.GrowthStage","name":"stage","type":"uint8"},{"internalType":"uint256","name":"plantedDate","type":"uint256"},{"internalType":"uint256","name":"lastWatered","type":"uint256"},{"internalType":"uint8","name":"waterLevel","type":"uint8"},{"internalType":"bool","name":"exists","type":"bool"},{"internalType":"bool","name":"isDead","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"plantId","type":"uint256"}],"name":"updatePlantStage","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"uint256","name":"","type":"uint256"}],"name":"userPlants","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"plantId","type":"uint256"}],"name":"waterPlant","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"},{"stateMutability":"payable","type":"receive"}] as const
+// LiskGardenV2 Contract ABI (simplified - only functions we use)
+export const LISK_GARDEN_V2_ABI = [
+  'function buyGDN() payable',
+  'function buyPlantNFT()',
+  'function useItem(uint256 plantId, uint8 item)',
+  'function careForOtherPlant(uint256 plantId)',
+  'function claimReward(uint256 plantId)',
+  'function getPlantData(uint256 plantId) view returns (uint256 progress, uint256 waterCountInCycle, uint256 fertilizerCountInCycle, uint256 waterTimeRemaining, uint256 fertilizerTimeRemaining)',
+  'function ownerOf(uint256 tokenId) view returns (address)',
+  'function balanceOf(address owner) view returns (uint256)',
+  'function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)',
+  'event GDNBought(address indexed to, uint256 amount)',
+  'event PlantPurchased(uint256 indexed plantId, address indexed buyer)',
+  'event ProgressUpdated(uint256 indexed plantId, address indexed by, uint256 newProgress)',
+  'event RewardClaimed(uint256 indexed plantId, address indexed owner, uint256 amount)',
+] as const
+
+// GardenToken (GDN) ERC20 ABI
+export const GARDEN_TOKEN_ABI = [
+  'function balanceOf(address account) view returns (uint256)',
+  'function approve(address spender, uint256 amount) returns (bool)',
+  'function allowance(address owner, address spender) view returns (uint256)',
+  'function transfer(address to, uint256 amount) returns (bool)',
+  'function decimals() view returns (uint8)',
+  'function symbol() view returns (string)',
+  'function name() view returns (string)',
+] as const
