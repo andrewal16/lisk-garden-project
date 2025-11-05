@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Droplet, Sparkles, Flame, Coins, Users, Clock } from "lucide-react"
 import { Plant, ItemType, WATER_COST, FERTILIZER_COST, REWARD_GDN_AMOUNT } from "@/types/contracts"
 import { usePlants } from "@/hooks/usePlants"
+import { useContract } from "@/hooks/useContract"
 import { formatTimeRemaining, canUseWater, canUseFertilizer, canClaimReward } from "@/lib/contract"
 
 interface PlantDetailsModalProps {
@@ -17,12 +18,14 @@ interface PlantDetailsModalProps {
 
 export default function PlantDetailsModal({ plant, isOpen, onClose }: PlantDetailsModalProps) {
   const { useItem, claimReward, careForOtherPlant, loading } = usePlants()
+  const { address } = useContract()
 
   if (!plant) return null
 
   const canWater = canUseWater(plant)
   const canFertilize = canUseFertilizer(plant)
   const canClaim = canClaimReward(plant)
+  const isOwnPlant = address?.toLowerCase() === plant.owner.toLowerCase()
 
   const handleUseWater = async () => {
     await useItem(plant.id, ItemType.WATER)
@@ -210,22 +213,24 @@ export default function PlantDetailsModal({ plant, isOpen, onClose }: PlantDetai
               </Button>
             )}
 
-            <Button
-              onClick={handleCareForOther}
-              disabled={loading || plant.progress >= 100}
-              variant="outline"
-              className="w-full gap-2"
-              size="sm"
-            >
-              {loading ? (
-                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <Users className="w-4 h-4" />
-                  Help This Plant (+1% FREE)
-                </>
-              )}
-            </Button>
+            {!isOwnPlant && (
+              <Button
+                onClick={handleCareForOther}
+                disabled={loading || plant.progress >= 100}
+                variant="outline"
+                className="w-full gap-2"
+                size="sm"
+              >
+                {loading ? (
+                  <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Users className="w-4 h-4" />
+                    Help This Plant
+                  </>
+                )}
+              </Button>
+            )}
 
             <Button
               variant="outline"
