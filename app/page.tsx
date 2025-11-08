@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react"
 import { motion } from "framer-motion"
-import { useSearchParams } from "next/navigation"
 import HeroSection from "@/components/hero-section"
 import GardenHeader from "@/components/garden-header"
 import GardenGrid from "@/components/garden-grid"
@@ -20,7 +19,6 @@ export default function Home() {
   const { plants, gdnBalance } = usePlants()
   const { isConnected } = useContract()
   const gardenRef = useRef<HTMLDivElement>(null)
-  const searchParams = useSearchParams()
 
   const selectedPlant = plants.find((p) => p.id === selectedPlantId) || null
 
@@ -100,9 +98,6 @@ export default function Home() {
           <aside className="w-80 hidden lg:block">
             <StatsSidebar 
               selectedPlantId={selectedPlantId}
-              plants={plants}
-              gdnBalance={gdnBalance}
-              isConnected={isConnected}
             />
           </aside>
         </motion.div>
