@@ -10,7 +10,7 @@ interface HeroSectionProps {
 }
 
 // Floating Asset Component - Compatible with Next.js
-const FloatingAsset = ({ src, alt, delay = 0, size = 120, position, animationDuration = 4 }) => (
+const FloatingAsset = ({ src, alt, delay = 0, size = 1, position, animationDuration = 4 }) => (
   <motion.div
     className="absolute"
     style={position}
@@ -19,25 +19,25 @@ const FloatingAsset = ({ src, alt, delay = 0, size = 120, position, animationDur
     transition={{ delay, duration: 0.6, type: "spring" }}
   >
     <motion.div
-      animate={{ 
+      animate={{
         y: [0, -20, 0],
         rotate: [-5, 5, -5],
       }}
-      transition={{ 
-        duration: animationDuration, 
-        repeat: Infinity, 
-        ease: "easeInOut" 
+      transition={{
+        duration: animationDuration,
+        repeat: Infinity,
+        ease: "easeInOut"
       }}
       whileHover={{ scale: 1.15, rotate: 0 }}
       className="cursor-pointer filter drop-shadow-2xl"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img 
-        src={src} 
-        alt={alt} 
-        width={size} 
+      <img
+        src={src}
+        alt={alt}
+        width={size}
         height={size}
-        className="w-full h-full object-contain"
+        className="object-contain"
       />
     </motion.div>
   </motion.div>
@@ -72,27 +72,27 @@ const CuteFeatureCard = ({ icon: Icon, title, description, color, delay = 0, gra
   >
     <div className={`p-6 rounded-3xl bg-white/95 backdrop-blur-md border-4 ${color} shadow-xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden h-full`}>
       {/* Animated gradient overlay */}
-      <motion.div 
+      <motion.div
         className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
       />
-      
+
       {/* Cute corner sparkle */}
-      <motion.div 
+      <motion.div
         className="absolute -top-1 -right-1"
         animate={{ rotate: [0, 360] }}
         transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
       >
         <Sparkles className="w-6 h-6 text-yellow-400" />
       </motion.div>
-      
-      <motion.div 
+
+      <motion.div
         className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-4 shadow-lg group-hover:shadow-xl transition-shadow`}
         whileHover={{ rotate: [0, -10, 10, 0] }}
         transition={{ duration: 0.5 }}
       >
         <Icon className="w-8 h-8 text-white drop-shadow" />
       </motion.div>
-      
+
       <h3 className="font-black text-xl text-gray-800 mb-2 group-hover:text-purple-600 transition-colors">
         {title}
       </h3>
@@ -106,18 +106,18 @@ const CuteFeatureCard = ({ icon: Icon, title, description, color, delay = 0, gra
 export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionProps) {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      
+
       {/* Enhanced Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-green-100 via-blue-100 to-purple-100">
         {/* Animated gradient overlay */}
-        <motion.div 
+        <motion.div
           className="absolute inset-0 bg-gradient-to-tr from-pink-200/30 via-transparent to-yellow-200/30"
           animate={{ opacity: [0.3, 0.5, 0.3] }}
           transition={{ duration: 5, repeat: Infinity }}
         />
-        
+
         {/* Cute pattern overlay */}
-        <div 
+        <div
           className="absolute inset-0 opacity-20"
           style={{
             backgroundImage: `radial-gradient(circle at 2px 2px, rgba(147, 197, 253, 0.4) 1px, transparent 0)`,
@@ -166,7 +166,7 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          
+
           {/* Left Column - Text Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -207,9 +207,9 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
               transition={{ delay: 0.3 }}
             >
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 leading-tight">
-                <motion.span 
+                <motion.span
                   className="block text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 mb-2"
-                  animate={{ 
+                  animate={{
                     backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
                   }}
                   transition={{ duration: 5, repeat: Infinity }}
@@ -217,9 +217,9 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
                 >
                   Grow Your
                 </motion.span>
-                <motion.span 
+                <motion.span
                   className="block text-transparent bg-clip-text bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500"
-                  animate={{ 
+                  animate={{
                     backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
                   }}
                   transition={{ duration: 5, repeat: Infinity, delay: 0.5 }}
@@ -227,9 +227,9 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
                 >
                   Dream Garden
                 </motion.span>
-                <motion.span 
+                <motion.span
                   className="inline-block text-5xl ml-2"
-                  animate={{ 
+                  animate={{
                     rotate: [0, 10, -10, 0],
                     scale: [1, 1.2, 1],
                   }}
@@ -248,8 +248,8 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
               className="mb-8"
             >
               <p className="text-lg sm:text-xl text-gray-700 leading-relaxed max-w-xl bg-white/40 backdrop-blur-sm p-4 rounded-2xl border-2 border-white/60 shadow-lg">
-                Plant cute <span className="font-black text-green-600">NFT seeds</span>, water them with love 💖, 
-                and watch them bloom into beautiful flowers! 
+                Plant cute <span className="font-black text-green-600">NFT seeds</span>, water them with love 💖,
+                and watch them bloom into beautiful flowers!
                 Earn <span className="font-black text-purple-600">GDN tokens</span> while having fun!
               </p>
             </motion.div>
@@ -307,15 +307,15 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
               className="flex flex-wrap gap-4"
             >
               {[
-                { value: "10K+", label: "Happy Plants", emoji: "🌺", color: "from-pink-400 to-rose-400" },
-                { value: "5K+", label: "Gardeners", emoji: "👨‍🌾", color: "from-green-400 to-emerald-400" },
-                { value: "50K+", label: "Rewards", emoji: "💎", color: "from-purple-400 to-blue-400" },
+                { value: "x K+", label: "Happy Plants", emoji: "🌺", color: "from-pink-400 to-rose-400" },
+                { value: "x K+", label: "Gardeners", emoji: "👨‍🌾", color: "from-green-400 to-emerald-400" },
+                { value: "xy K+", label: "Rewards", emoji: "💎", color: "from-purple-400 to-blue-400" },
               ].map((stat, i) => (
-                <motion.div 
+                <motion.div
                   key={i}
                   className="flex items-center gap-3 px-5 py-3 bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border-3 border-white relative overflow-hidden group cursor-pointer"
                   whileHover={{ scale: 1.1, y: -3 }}
-                  animate={{ 
+                  animate={{
                     y: [0, -5, 0],
                   }}
                   transition={{
@@ -325,7 +325,7 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
                   <motion.div
                     className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-0 group-hover:opacity-20 transition-opacity`}
                   />
-                  <motion.span 
+                  <motion.span
                     className="text-3xl relative z-10"
                     animate={{ rotate: [0, 10, -10, 0] }}
                     transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
@@ -353,9 +353,9 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
             className="relative h-[600px] flex items-center justify-center"
           >
             {/* Central Glow Effect */}
-            <motion.div 
+            <motion.div
               className="absolute inset-0 bg-gradient-to-br from-green-300/40 via-blue-300/40 to-purple-300/40 rounded-full blur-3xl"
-              animate={{ 
+              animate={{
                 scale: [1, 1.2, 1],
                 opacity: [0.3, 0.6, 0.3],
               }}
@@ -366,9 +366,9 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
             <FloatingAsset
               src="/plantPot.png"
               alt="Main Plant"
-              size={140}
+              size={200}
               delay={0.5}
-              position={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)', zIndex: 30 }}
+              position={{ left: '40%', top: '30%', transform: 'translate(-50%, -50%)', zIndex: 30 }}
               animationDuration={3.5}
             />
 
@@ -384,9 +384,9 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
 
             {/* Top Right - Plant with Care (Image 1) - plantCare.png */}
             <FloatingAsset
-              src="/plantCare.png"
+              src="/pupuk2.png"
               alt="Plant with Care"
-              size={180}
+              size={140}
               delay={0.9}
               position={{ right: '5%', top: '10%', zIndex: 20 }}
               animationDuration={4}
@@ -394,7 +394,7 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
 
             {/* Bottom Left - Small Plant - plantPot.png (reuse) */}
             <FloatingAsset
-              src="/plantPot.png"
+              src="/pupuk.png"
               alt="Small Plant"
               size={140}
               delay={1.1}
@@ -406,7 +406,7 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
             <FloatingAsset
               src="/waterDrop.png"
               alt="Water Drop"
-              size={70}
+              size={140}
               delay={1.3}
               position={{ right: '8%', bottom: '18%', zIndex: 15 }}
               animationDuration={4.5}
@@ -520,7 +520,7 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
           <motion.path
             d="M0,60 Q360,90 720,60 T1440,60 L1440,120 L0,120 Z"
             fill="url(#waveGradient)"
-            animate={{ 
+            animate={{
               d: [
                 "M0,60 Q360,90 720,60 T1440,60 L1440,120 L0,120 Z",
                 "M0,70 Q360,50 720,70 T1440,70 L1440,120 L0,120 Z",

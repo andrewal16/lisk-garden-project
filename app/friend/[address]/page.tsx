@@ -271,7 +271,7 @@ export default function FriendGardenPage() {
                         )}
                       </Button>
 
-                      <div className="grid grid-cols-2 gap-2">
+                      {/* <div className="grid grid-cols-2 gap-2">
                         <Button
                           onClick={() => handleUseWater(plant.id)}
                           disabled={actionLoading}
@@ -292,7 +292,7 @@ export default function FriendGardenPage() {
                           <Flame className="w-4 h-4 text-orange-500" />
                           Fertilizer
                         </Button>
-                      </div>
+                      </div> */}
                     </div>
                   )}
 
