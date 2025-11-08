@@ -283,9 +283,9 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
               className="flex flex-wrap gap-6 mt-12"
             >
               {[
-                { value: "5K+", label: "Happy Plants", emoji: "🌺" },
-                { value: "2K+", label: "Gardeners", emoji: "👨‍🌾" },
-                { value: "50K+", label: "Rewards", emoji: "💎" },
+                { value: "X K+", label: "Happy Plants", emoji: "🌺" },
+                { value: "X K+", label: "Gardeners", emoji: "👨‍🌾" },
+                { value: "XY K+", label: "Rewards", emoji: "💎" },
               ].map((stat, i) => (
                 <motion.div 
                   key={i}
