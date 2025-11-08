@@ -280,7 +280,7 @@ export default function StatsSidebar({ selectedPlantId }: StatsSidebarProps) {
               { label: "Buy GDN", value: `${ETH_ENTRY_FEE} ETH → ${INITIAL_GDN_GIVEAWAY} GDN`, icon: "💰" },
               { label: "Plant NFT", value: `${PLANT_NFT_COST} GDN`, icon: "🌱" },
               { label: "Water", value: `${WATER_COST} GDN (+15%)`, icon: "💧" },
-              { label: "Fertilizer", value: `${FERTILIZER_COST} GDN (+20%)`, icon: "🔥" },
+              { label: "Fertilizer", value: `${FERTILIZER_COST} GDN (+20%)`, icon: "🫘" },
               { label: "Reward", value: `${REWARD_GDN_AMOUNT} GDN`, icon: "🎁" },
             ].map((item, i) => (
               <motion.div 

@@ -637,7 +637,7 @@ export default function ShopPage() {
                           animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
                           transition={{ duration: 2, repeat: Infinity }}
                         >
-                          🔥
+                          🫘
                         </motion.div>
                         <div className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 
                           rounded-full text-xs font-black text-orange-700 dark:text-orange-300 

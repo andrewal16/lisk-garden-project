@@ -62,7 +62,7 @@ export default function FriendGardenPage() {
       await useItem(plantId, ItemType.FERTILIZER)
       await fetchFriendPlants(true)
       toast({
-        title: "🔥 Fertilized!",
+        title: "🫘 Fertilized!",
         description: "Plant is growing stronger!",
       })
     } catch (error) {
@@ -145,7 +145,7 @@ export default function FriendGardenPage() {
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   You can help any plant for <strong className="text-pink-600 dark:text-pink-400">FREE</strong> by giving it +1% progress 🎁
                   <br />
-                  Or use your own Water 💧 / Fertilizer 🔥 items on their plants!
+                  Or use your own Water 💧 / Fertilizer 🫘 items on their plants!
                 </p>
               </div>
             </div>

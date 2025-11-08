@@ -452,7 +452,7 @@ export default function PlantDetailsModal({ plant, isOpen, onClose }: PlantDetai
             <p className="text-xs text-muted-foreground leading-relaxed font-semibold">
               💧 <strong>Water</strong>: {WATER_COST} GDN → +15%
               <br />
-              🔥 <strong>Fertilizer</strong>: {FERTILIZER_COST} GDN → +20%
+              🫘 <strong>Fertilizer</strong>: {FERTILIZER_COST} GDN → +20%
               <br />
               🤝 <strong>Help</strong>: FREE → +1%
               <br />

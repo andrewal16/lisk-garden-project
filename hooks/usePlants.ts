@@ -276,7 +276,7 @@ export function usePlants() {
       setLoading(true)
       
       const itemName = itemType === ItemType.FERTILIZER ? 'Fertilizer' : 'Water'
-      const itemEmoji = itemType === ItemType.FERTILIZER ? '🔥' : '💧'
+      const itemEmoji = itemType === ItemType.FERTILIZER ? '🫘' : '💧'
       const itemCost = itemType === ItemType.FERTILIZER ? '15' : '10'
       const progressIncrease = itemType === ItemType.FERTILIZER ? 20 : 15
 
